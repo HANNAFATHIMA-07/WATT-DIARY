@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+<div class="title">Enter Usage</div>
+
+<div id="list"></div>
+
+<button onclick="send()">See Results</button>
+
+</div>
+
+<script>
+
+let devices = [
+{name:"Air Conditioner", watt:1500},
+{name:"Ceiling Fan", watt:75},
+{name:"LED TV", watt:120},
+{name:"Laptop", watt:65},
+{name:"Refrigerator", watt:300},
+{name:"Microwave Oven", watt:1000},
+{name:"LED Bulb", watt:10}
+];
+
+function load(){
+let html="";
+
+devices.forEach((d,i)=>{
+html+=`
+<div class="card">
+${d.name} (${d.watt}W)
+<input id="h${i}" placeholder="Hours used">
+</div>`;
+});
+
+document.getElementById("list").innerHTML=html;
+}
+
+function send(){
+
+let data=[];
+
+devices.forEach((d,i)=>{
+let h=document.getElementById("h"+i).value || 0;
+
+data.push({
+name:d.name,
+watt:d.watt,
+hours:h
+});
+});
+
+fetch("http://localhost:8080/calculate",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+})
+.then(res=>res.json())
+.then(result=>{
+localStorage.setItem("result",JSON.stringify(result));
+window.location="result.html";
+});
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>

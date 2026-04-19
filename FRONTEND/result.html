@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+<div class="title">Results</div>
+
+<div id="log"></div>
+
+<canvas id="chart" width="300" height="200"></canvas>
+
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("result"));
+
+let total = 0;
+let html = "";
+
+data.forEach(d=>{
+total += d.kwh;
+html += `<div class="card">${d.name} → ${d.kwh.toFixed(2)} kWh</div>`;
+});
+
+html += `<div class="card"><b>Total: ${total.toFixed(2)} kWh</b></div>`;
+
+document.getElementById("log").innerHTML = html;
+
+// GRAPH
+let canvas = document.getElementById("chart");
+let ctx = canvas.getContext("2d");
+
+let x = 10;
+
+data.forEach(d=>{
+let height = d.kwh * 100;
+
+ctx.fillRect(x, 200 - height, 20, height);
+ctx.fillText(d.name, x, 195);
+
+x += 40;
+});
+
+</script>
+
+</body>
+</html>

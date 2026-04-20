@@ -1,50 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
+<title>Watt Diary</title>
 <link rel="stylesheet" href="style.css">
+<style>
+body{
+  background:#0e1117;
+  color:white;
+  font-family: Arial;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  padding:15px;
+  font-size:20px;
+}
+
+.circle{
+  width:200px;
+  height:200px;
+  border-radius:50%;
+  border:15px solid #222;
+  border-top:15px solid red;
+  margin:20px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  font-weight:bold;
+}
+
+.badge{
+  text-align:center;
+  margin:15px;
+  padding:10px;
+  border:1px solid #00ff88;
+  border-radius:30px;
+  color:#00ff88;
+}
+
+.card{
+  background:#1c1f26;
+  margin:12px;
+  padding:15px;
+  border-radius:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.amount{
+  color:orange;
+  font-weight:bold;
+}
+
+.small{
+  font-size:14px;
+  color:gray;
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-
-<div class="title">Results</div>
-
-<div id="log"></div>
-
-<canvas id="chart" width="300" height="200"></canvas>
-
+<div class="header">
+  <div>⚡ Watt Diary</div>
+  <div id="date"></div>
 </div>
+
+<div class="circle" id="efficiency">0</div>
+
+<div class="badge" id="totalBadge"></div>
+
+<div id="applianceList"></div>
 
 <script>
 
+// set date
+document.getElementById("date").innerText =
+new Date().toDateString();
+
+// electricity rate (₹ per unit)
+let rate = 3;
+
+// get backend result
 let data = JSON.parse(localStorage.getItem("result"));
 
-let total = 0;
+let totalKwh = 0;
+let totalCost = 0;
 let html = "";
 
 data.forEach(d=>{
-total += d.kwh;
-html += `<div class="card">${d.name} → ${d.kwh.toFixed(2)} kWh</div>`;
+
+  totalKwh += d.kwh;
+
+  let cost = d.kwh * rate;
+  totalCost += cost;
+
+  html += `
+  <div class="card">
+    <div>
+      <div><b>${d.name}</b></div>
+      <div class="small">${d.kwh.toFixed(2)} kWh logged</div>
+    </div>
+    <div class="amount">₹${cost.toFixed(2)}</div>
+  </div>
+  `;
 });
 
-html += `<div class="card"><b>Total: ${total.toFixed(2)} kWh</b></div>`;
+document.getElementById("applianceList").innerHTML = html;
 
-document.getElementById("log").innerHTML = html;
+// update badge
+document.getElementById("totalBadge").innerHTML =
+`Critical — ${totalKwh.toFixed(2)} kWh today | ₹${totalCost.toFixed(2)}`;
 
-// GRAPH
-let canvas = document.getElementById("chart");
-let ctx = canvas.getContext("2d");
-
-let x = 10;
-
-data.forEach(d=>{
-let height = d.kwh * 100;
-
-ctx.fillRect(x, 200 - height, 20, height);
-ctx.fillText(d.name, x, 195);
-
-x += 40;
-});
+// efficiency score (simple logic)
+let efficiencyScore = Math.max(0, 100 - totalKwh*5);
+document.getElementById("efficiency").innerText =
+Math.round(efficiencyScore);
 
 </script>
 
